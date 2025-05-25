@@ -29,7 +29,7 @@ class App {
 
     this.app.use('/api/auth', authRoutes);
     this.app.use('/api/groups', groupRoutes);
-    this.app.use('/api/vote', voteRoutes);
+    this.app.use('/api/votes', voteRoutes);
   }
 
   getApp() {
