@@ -1,0 +1,170 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Group Voting API",
+    "version": "1.0.0",
+    "description": "API donde varios usuarios pueden crear grupos para votar decisiones, eventos, películas, etc. con diferentes métodos de votación."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor local"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Registrar un nuevo usuario",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "email", "password"],
+                "properties": {
+                  "username": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuario registrado exitosamente" },
+          "400": { "description": "Datos inválidos o usuario ya existente" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Iniciar sesión",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login exitoso, se devuelve token" },
+          "401": { "description": "Credenciales inválidas" }
+        }
+      }
+    },
+    "/api/groups": {
+      "get": {
+        "summary": "Obtener todos los grupos del usuario autenticado",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de grupos" },
+          "401": { "description": "Token inválido o faltante" }
+        }
+      },
+      "post": {
+        "summary": "Crear un nuevo grupo",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Grupo creado correctamente" },
+          "401": { "description": "No autorizado" }
+        }
+      }
+    },
+    "/api/groups/{id}": {
+      "get": {
+        "summary": "Obtener un grupo por ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Grupo encontrado" },
+          "404": { "description": "Grupo no encontrado" }
+        }
+      }
+    },
+    "/api/votes": {
+      "post": {
+        "summary": "Emitir un voto en un grupo",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["groupId", "option"],
+                "properties": {
+                  "groupId": { "type": "string" },
+                  "option": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Voto registrado correctamente" },
+          "400": { "description": "Voto inválido o duplicado" },
+          "401": { "description": "No autorizado" }
+        }
+      }
+    },
+    "/api/votes/results/{groupId}": {
+      "get": {
+        "summary": "Obtener resultados de votación para un grupo",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Resultados de votación devueltos" },
+          "401": { "description": "No autorizado" },
+          "404": { "description": "Grupo no encontrado" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -52,37 +52,38 @@ export class GroupController {
     }
   }
 
-  static async addMember(req, res) {
-    try {
-      const { groupId } = req.params;
-      const { userId } = req.body;
+static async addMember(req, res) {
+  try {
+    const { groupId } = req.params;
+    const { userId } = req.body;
 
-      if (!userId) {
-        return res
-          .status(400)
-          .json({ message: 'Falta el userId para agregar' });
-      }
-
-      const group = await Group.findById(groupId).populate('members', 'username email');
-      if (!group) {
-        return res.status(404).json({ message: 'Grupo no encontrado' });
-      }
-
-      // Verificar que el usuario no esté ya en el grupo
-      if (group.members.includes(userId)) {
-        return res
-          .status(400)
-          .json({ message: 'Usuario ya es miembro del grupo' });
-      }
-
-      // Agregar usuario al array members
-      group.members.push(userId);
-      await group.save();
-
-      return res.status(200).json({ message: 'Miembro agregado', group });
-    } catch (error) {
-      console.error('Error al agregar miembro:', error);
-      return res.status(500).json({ message: 'Error interno del servidor' });
+    if (!userId) {
+      return res.status(400).json({ message: 'Falta el userId para agregar' });
     }
+
+    // Traer el grupo SIN poblar para comparar IDs correctamente
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: 'Grupo no encontrado' });
+    }
+
+    // Validar si ya está el usuario
+    if (group.members.some(m => m.toString() === userId)) {
+      return res.status(400).json({ message: 'El Usuario ya es miembro del grupo' });
+    }
+
+    // Agregar usuario
+    group.members.push(userId);
+    await group.save();
+
+    // Poblar para devolver la info completa del grupo
+    await group.populate('members', 'username email');
+
+    return res.status(200).json({ message: 'Miembro agregado', group });
+  } catch (error) {
+    console.error('Error al agregar miembro:', error);
+    return res.status(500).json({ message: 'Error interno del servidor' });
   }
+}
+
 }
