@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
+import { authorizeRoles } from '../middlewares/role.middleware.js';
 
 const router = Router();
 
@@ -9,7 +10,7 @@ const router = Router();
 router.post('/register', AuthController.register);
 
 // Obtener todos los usuarios (sin contraseña visible)
-router.get('/', verifyToken, AuthController.getAllUsers);
+router.get('/', verifyToken, authorizeRoles('admin'), AuthController.getAllUsers);
 
 // Iniciar sesión
 router.post('/login', AuthController.login);

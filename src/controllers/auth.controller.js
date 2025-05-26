@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 export class AuthController {
   static async register(req, res) {
     try {
-      const { username, email, password } = req.body;
+      const { username, email, password, role: requestedRole } = req.body;
 
       if (!username || !email || !password) {
         return res.status(400).json({ message: 'Faltan datos requeridos' });
@@ -16,8 +16,16 @@ export class AuthController {
         return res.status(409).json({ message: 'El usuario ya existe' });
       }
 
-      const newUser = new User({ username, email, password }); // ← sin hashing
+      // Verifica si ya existe al menos un admin
+      const adminExists = await User.findOne({ role: 'admin' });
 
+      // Solo permitir crear admin si no hay ninguno
+      let role = 'user';
+      if (requestedRole === 'admin' && !adminExists) {
+        role = 'admin';
+      }
+
+      const newUser = new User({ username, email, password, role });
       await newUser.save();
 
       return res.status(201).json({
@@ -26,6 +34,7 @@ export class AuthController {
           id: newUser._id,
           username: newUser.username,
           email: newUser.email,
+          role: newUser.role,
         },
       });
     } catch (error) {
@@ -59,7 +68,12 @@ export class AuthController {
       }
 
       const token = jwt.sign(
-        { id: user._id, username: user.username, email: user.email },
+        {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
         process.env.JWT_SECRET,
         { expiresIn: '2h' }
       );
