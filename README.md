@@ -134,7 +134,7 @@ JWT_SECRET=tu_secreto_jwt
 
 - Opciones válidas para votar: Node.js, Django, Laravel.
 
-Licencia
-Este proyecto está registrado en derechos de Autor México.
+# Licencia
+- Este proyecto está registrado en derechos de Autor México.
 
-Desarrollado por [Ariel Fuentes García]
+***Desarrollado por [Ariel Fuentes García]***
