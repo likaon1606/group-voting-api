@@ -1,7 +1,7 @@
 {
   "name": "group-voting-api",
   "version": "1.0.0",
-  "description": "API donde varios usuarios pueden crear \"grupos de decisión\" con temas a votar (como fechas de eventos, películas, decisiones del equipo, etc.). Los miembros del grupo votan y el sistema usa reglas simples para decidir la opción final (por mayoría, por puntos, por prioridad, etc.).",
+  "description": "REST API donde varios usuarios pueden crear grupos para votar decisiones, stacks para un proyecto, librerías, temas de juntas de trabajo, etc.",
   "main": "app.js",
   "type": "module",
   "scripts": {

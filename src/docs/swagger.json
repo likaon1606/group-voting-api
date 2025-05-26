@@ -3,7 +3,7 @@
   "info": {
     "title": "Group Voting API",
     "version": "1.0.0",
-    "description": "API donde varios usuarios pueden crear grupos para votar decisiones, eventos, películas, etc. con diferentes métodos de votación."
+    "description": "REST API donde varios usuarios pueden crear grupos para votar decisiones, stacks para un proyecto, librerías a usar de un lenguaje de programación, temas de juntas de trabajo, etc.\n\n**Notas de uso en Postman:**\n\n- **Registro de usuario:**\n  ```json\n  {\n    \"username\": \"usuario\",\n    \"email\": \"usuario@example.com\",\n    \"password\": \"123456\"\n  }\n  ```\n  Por defecto, el usuario se crea con rol `user`. Solo el primer usuario que se registre y se le asigne el campo `\"role\": \"admin\"` podrá ser admin. Solo puede existir un usuario admin.\n\n- **Login:**\n  ```json\n  {\n    \"email\": \"ariel@example.com\",\n    \"password\": \"123456\"\n  }\n  ```\n  Devuelve un token JWT para usar en los endpoints protegidos.\n\n- **Crear grupo:**\n  ```json\n  {\n    \"name\": \"Equipo Back End\",\n    \"description\": \"Elegir el Stack a utilizar en el nuevo proyecto Back End\"\n  }\n  ```\n  Solo usuarios con rol `admin` pueden crear grupos.\n\n- **Agregar miembro a grupo:**\n  ```json\n  {\n    \"userId\": \"Id del usuario a agregar al grupo\"\n  }\n  ```\n  Solo admins pueden agregar miembros.\n\n- **Registrar voto:**\n  ```json\n  {\n    \"groupId\": \"Id del grupo\",\n    \"option\": \"Laravel\"\n  }\n  ```\n  Usuarios con rol `user` o `admin` pueden votar."
   },
   "servers": [
     {
@@ -15,6 +15,7 @@
     "/api/auth/register": {
       "post": {
         "summary": "Registrar un nuevo usuario",
+        "description": "Registra un usuario nuevo. Por defecto el usuario se crea con rol `user`. Solo el primer usuario creado puede tener rol `admin` si se le asigna explícitamente.",
         "requestBody": {
           "required": true,
           "content": {
@@ -25,8 +26,18 @@
                 "properties": {
                   "username": { "type": "string" },
                   "email": { "type": "string" },
-                  "password": { "type": "string" }
+                  "password": { "type": "string" },
+                  "role": {
+                    "type": "string",
+                    "enum": ["user", "admin"],
+                    "description": "Opcional. Solo se usa para el primer usuario, para crear admin."
+                  }
                 }
+              },
+              "example": {
+                "username": "usuario",
+                "email": "usuario@example.com",
+                "password": "123456"
               }
             }
           }
@@ -40,6 +51,7 @@
     "/api/auth/login": {
       "post": {
         "summary": "Iniciar sesión",
+        "description": "Inicia sesión con email y contraseña y devuelve un token JWT.",
         "requestBody": {
           "required": true,
           "content": {
@@ -51,6 +63,10 @@
                   "email": { "type": "string" },
                   "password": { "type": "string" }
                 }
+              },
+              "example": {
+                "email": "ariel@example.com",
+                "password": "123456"
               }
             }
           }
@@ -72,6 +88,7 @@
       },
       "post": {
         "summary": "Crear un nuevo grupo",
+        "description": "Solo usuarios con rol admin pueden crear grupos.",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -84,6 +101,10 @@
                   "name": { "type": "string" },
                   "description": { "type": "string" }
                 }
+              },
+              "example": {
+                "name": "Equipo Back End",
+                "description": "Elegir el Stack a utilizar en el nuevo proyecto Back End"
               }
             }
           }
@@ -94,16 +115,17 @@
         }
       }
     },
-    "/api/groups/{id}": {
+    "/api/groups/{groupId}": {
       "get": {
         "summary": "Obtener un grupo por ID",
         "security": [{ "bearerAuth": [] }],
         "parameters": [
           {
-            "name": "id",
+            "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": { "type": "string" },
+            "description": "ID del grupo a consultar"
           }
         ],
         "responses": {
@@ -112,9 +134,48 @@
         }
       }
     },
+    "/api/groups/{groupId}/addMembers": {
+      "post": {
+        "summary": "Agregar un miembro a un grupo",
+        "description": "Solo usuarios admin pueden agregar miembros a un grupo.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "ID del grupo al que se agregará el usuario"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["userId"],
+                "properties": {
+                  "userId": { "type": "string" }
+                }
+              },
+              "example": {
+                "userId": "id-del-usuario"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Miembro agregado correctamente" },
+          "401": { "description": "No autorizado" },
+          "404": { "description": "Grupo o usuario no encontrado" }
+        }
+      }
+    },
     "/api/votes": {
       "post": {
         "summary": "Emitir un voto en un grupo",
+        "description": "Usuarios con rol 'user' o 'admin' pueden votar en un grupo.",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -125,8 +186,16 @@
                 "required": ["groupId", "option"],
                 "properties": {
                   "groupId": { "type": "string" },
-                  "option": { "type": "string" }
+                  "option": {
+                    "type": "string",
+                    "enum": ["Node.js", "Django", "Laravel"],
+                    "description": "Opciones válidas para votar"
+                  }
                 }
+              },
+              "example": {
+                "groupId": "id-del-grupo",
+                "option": "Laravel"
               }
             }
           }
@@ -135,6 +204,26 @@
           "201": { "description": "Voto registrado correctamente" },
           "400": { "description": "Voto inválido o duplicado" },
           "401": { "description": "No autorizado" }
+        }
+      }
+    },
+    "/api/votes/{groupId}": {
+      "get": {
+        "summary": "Obtener votos de un grupo",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "ID del grupo para obtener votos"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Lista de votos del grupo" },
+          "401": { "description": "No autorizado" },
+          "404": { "description": "Grupo no encontrado" }
         }
       }
     },
@@ -147,7 +236,8 @@
             "name": "groupId",
             "in": "path",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": { "type": "string" },
+            "description": "ID del grupo para obtener resultados"
           }
         ],
         "responses": {
