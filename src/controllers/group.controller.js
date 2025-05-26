@@ -1,7 +1,7 @@
 import { Group } from '../models/Group.js';
 
 export class GroupController {
-  // Crear grupo
+
   static async createGroup(req, res) {
     try {
       const { name, description } = req.body;
@@ -24,7 +24,6 @@ export class GroupController {
     }
   }
 
-  // Obtener grupo por ID
   static async getGroupById(req, res) {
     try {
       const { groupId } = req.params;
@@ -41,7 +40,6 @@ export class GroupController {
     }
   }
 
-  // Listar todos los grupos
   static async getAllGroups(_req, res) {
     try {
       const groups = await Group.find();
@@ -61,22 +59,22 @@ static async addMember(req, res) {
       return res.status(400).json({ message: 'Falta el userId para agregar' });
     }
 
-    // Traer el grupo SIN poblar para comparar IDs correctamente
+    // Bring the UNPOPULATED group to compare IDs correctly
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: 'Grupo no encontrado' });
     }
 
-    // Validar si ya está el usuario
+    // Validate if the user is already a member
     if (group.members.some(m => m.toString() === userId)) {
       return res.status(400).json({ message: 'El Usuario ya es miembro del grupo' });
     }
 
-    // Agregar usuario
+    // Add the user to the group
     group.members.push(userId);
     await group.save();
 
-    // Poblar para devolver la info completa del grupo
+    // Populate the members field to return user details
     await group.populate('members', 'username email');
 
     return res.status(200).json({ message: 'Miembro agregado', group });

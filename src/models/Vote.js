@@ -14,10 +14,10 @@ const voteSchema = new mongoose.Schema({
   option: {
     type: String,
     required: true,
-    enum: ['Node.js', 'Django', 'Laravel'], // ✅ validación de opciones
+    enum: ['Node.js', 'Django', 'Laravel'],
   },
 }, { timestamps: true });
 
-voteSchema.index({ user: 1, group: 1 }, { unique: true }); // 1 voto por usuario por grupo
+voteSchema.index({ user: 1, group: 1 }, { unique: true }); // one vote per user per group
 
 export const Vote = mongoose.model('Vote', voteSchema);

@@ -1,4 +1,3 @@
-// src/controllers/auth.controller.js
 import { User } from '../models/User.js';
 import jwt from 'jsonwebtoken';
 
@@ -16,10 +15,10 @@ export class AuthController {
         return res.status(409).json({ message: 'El usuario ya existe' });
       }
 
-      // Verifica si ya existe al menos un admin
+      // veryfy if an admin already exists
       const adminExists = await User.findOne({ role: 'admin' });
 
-      // Solo permitir crear admin si no hay ninguno
+      // If an admin exists, the new user will be a regular user
       let role = 'user';
       if (requestedRole === 'admin' && !adminExists) {
         role = 'admin';
@@ -45,7 +44,7 @@ export class AuthController {
 
   static async getAllUsers(req, res) {
     try {
-      const votes = await User.find({}, '-password'); // Excluir el campo password
+      const votes = await User.find({}, '-password'); // excludes the password field
       return res.status(200).json(votes);
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
@@ -94,5 +93,4 @@ export class AuthController {
   }
 }
 
-// Exporta la función estática para usarla en las rutas
 export const registerUser = AuthController.register;

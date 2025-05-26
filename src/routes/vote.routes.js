@@ -6,10 +6,10 @@ import { authorizeRoles } from '../middlewares/role.middleware.js';
 
 const router = Router();
 
-// Registrar un voto
+// Register a vote
 router.post('/', verifyToken, authorizeRoles('user', 'admin'), VoteController.createVote);
 
-// Obtener votos de un grupo
+// Getting votes from a group
 router.get('/:groupId', verifyToken, VoteController.getVotesByGroup);
 
 export default router;

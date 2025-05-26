@@ -1,4 +1,3 @@
-// src/routes/group.routes.js
 import { Router } from 'express';
 import { GroupController } from '../controllers/group.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
@@ -6,16 +5,16 @@ import { authorizeRoles } from '../middlewares/role.middleware.js';
 
 const router = Router();
 
-// Crear grupo
+// Create group
 router.post('/', verifyToken, authorizeRoles('admin'), GroupController.createGroup);
 
-// Obtener todos los grupos
+// Get all groups
 router.get('/', GroupController.getAllGroups);
 
-// Obtener grupo por ID
+// Get group by ID
 router.get('/:groupId', GroupController.getGroupById);
 
-// Agregar ruta POST para agregar miembro
+// ADD a member to a group
 router.post('/:groupId/addMembers', verifyToken, authorizeRoles('admin'), GroupController.addMember);
 
 export default router;

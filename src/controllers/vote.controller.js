@@ -5,7 +5,7 @@ export class VoteController {
   static async createVote(req, res) {
     try {
       const { option, groupId } = req.body;
-      const userId = req.user.id; // ← viene desde verifyToken
+      const userId = req.user.id; 
 
       if (!option || !groupId) {
         return res
@@ -13,13 +13,13 @@ export class VoteController {
           .json({ message: 'Faltan datos para registrar el voto' });
       }
 
-      // Verifica si el grupo existe
+      // Check if the group exists
       const group = await Group.findById(groupId);
       if (!group) {
         return res.status(404).json({ message: 'Grupo no encontrado' });
       }
 
-      // Verifica si el usuario es miembro del grupo
+      // Check if the user is a member of the group
       const isMember = group.members.includes(userId);
       if (!isMember) {
         return res
@@ -27,19 +27,19 @@ export class VoteController {
           .json({ message: 'No eres miembro de este grupo' });
       }
 
-      // Verifica si ya votó
+      // Check if the user voted alredy
       const alreadyVoted = await Vote.findOne({ user: userId, groupId });
       if (alreadyVoted) {
         return res.status(400).json({ message: 'Ya has votado en este grupo' });
       }
 
-      // Verificar si el usuario ya votó en este grupo
+      // Check if the user has already voted in this group
       const existingVote = await Vote.findOne({ user: userId, group: groupId });
       if (existingVote) {
         return res.status(400).json({ message: 'Ya has votado en este grupo' });
       }
 
-      // Registrar voto
+      // Register the vote
       const newVote = new Vote({ user: userId, group: groupId, option });
       await newVote.save();
 

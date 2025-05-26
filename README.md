@@ -137,4 +137,4 @@ JWT_SECRET=tu_secreto_jwt
 # Licencia
 - Este proyecto está registrado en derechos de Autor México.
 
-***Desarrollado por [Ariel Fuentes García]***
+***Desarrollado por Ariel Fuentes García***
