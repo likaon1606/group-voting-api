@@ -82,7 +82,7 @@ JWT_SECRET=tu_secreto_jwt
 
 ```json
 {
-  "name": "Equipo Front End",
+  "name": "Equipo Back End",
   "description": "Elegir el Stack para el proyecto"
 }
 ```
